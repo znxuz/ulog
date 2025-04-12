@@ -10,7 +10,7 @@ Some features of uLog:
 * uLog is easy to incorporate into nearly any environment, comprising one header file and one source file, and is written in pure C.
 * uLog provides familiar severity levels (CRITICAL, ERROR, WARNING, INFO, DEBUG, TRACE).
 * uLog supports multiple user-defined outputs (console, log file, in-memory buffer, etc), each with its own reporting threshold level.
-* uLog is "aggressively standalone" with minimal dependencies, requiring only stdio.h, string.h and stdarg.h.  
+* uLog is "aggressively standalone" with minimal dependencies, requiring just string.h, stdarg.h and only additionally stdio.h if you don't provide a custom formatter.
 * uLog gets out of your way when you're not using it: if ULOG_ENABLED is undefined at compile time, no logging code is generated.
 * uLog is well tested.  See the accompanying ulog_test.c file for details.
 
@@ -65,6 +65,26 @@ int main() {
     ULOG_INFO("Info, arg=%d", arg);          // logs to console only
 }
 ```
+
+## A custom formatter for uLog
+
+If `-DULOG_FORMATTER` is defined, uLog then tries to use `ulog_formatter()` with
+the same signature as `vsnprintf()` to format the output:
+
+``` c
+int ulog_formatter(char*, size_t, const char*, va_list);
+```
+
+For cases you wish to handroll the formatter yourself, or just want to use
+another `vsnprintf()` implementation by simply forwarding the arguments to it:
+
+``` c
+int ulog_formatter(char* buffer, size_t count, const char* format, va_list va) {
+  return vsnprintf_(buffer, count, format, va); // another vsnprintf impl.
+}
+```
+
+Otherwise uLog falls back to `vsnprintf()` from `<stdio.h>`.
 
 ## Questions?  Comments?  Improvements?
 

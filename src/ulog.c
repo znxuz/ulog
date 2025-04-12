@@ -33,9 +33,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #ifdef ULOG_ENABLED  // whole file...
 
-#include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#ifdef ULOG_FORMATTER
+extern int ulog_formatter(char*, size_t, const char*, va_list);
+#else
+#include <stdio.h>
+#endif
 
 
 // =============================================================================
@@ -124,7 +128,11 @@ void ulog_message(ulog_level_t severity, const char *fmt, ...) {
   va_list ap;
   int i;
   va_start(ap, fmt);
+#ifdef ULOG_FORMATTER
+  ulog_formatter(s_message, ULOG_MAX_MESSAGE_LENGTH, fmt, ap);
+#else
   vsnprintf(s_message, ULOG_MAX_MESSAGE_LENGTH, fmt, ap);
+#endif
   va_end(ap);
 
   for (i=0; i<ULOG_MAX_SUBSCRIBERS; i++) {
